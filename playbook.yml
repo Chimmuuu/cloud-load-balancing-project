@@ -1,0 +1,79 @@
+- name: Configure Load Balancer and Web Servers
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Detect OS Family
+      debug:
+        msg: "OS Family is {{ ansible_os_family }}"
+
+    # -------------------------------
+    # Web Server 1 (Primary) - Install Nginx (Amazon Linux/RHEL)
+    # -------------------------------
+    - name: Install Nginx on Web Server 1 (Amazon Linux/RHEL)
+      yum:
+        name: nginx
+        state: present
+        update_cache: yes
+      when: inventory_hostname == "web-server-1"
+
+    - name: Start and Enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      when: inventory_hostname == "web-server-1"
+
+    - name: Copy custom index.html for Nginx
+      copy:
+        content: "<h1>Welcome to Web Server 1 (Nginx)</h1>"
+        dest: /usr/share/nginx/html/index.html
+      when: inventory_hostname == "web-server-1"
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+      when: inventory_hostname == "web-server-1"
+
+    # -------------------------------
+    # Web Server 2 (Secondary) - Install Apache & Firewalld (Amazon Linux/RHEL)
+    # -------------------------------
+    - name: Install Apache and Firewalld on Web Server 2
+      yum:
+        name:
+          - httpd
+          - firewalld
+        state: present
+      when: inventory_hostname == "web-server-2"
+
+    - name: Start and Enable Apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: inventory_hostname == "web-server-2"
+
+    - name: Copy custom index.html for Apache
+      copy:
+        content: "<h1>Welcome to Web Server 2 (Apache)</h1>"
+        dest: /var/www/html/index.html
+      when: inventory_hostname == "web-server-2"
+
+    - name: Open Firewall Ports for Apache
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+      when: inventory_hostname == "web-server-2"
+
+    - name: Reload Firewalld
+      command: firewall-cmd --reload
+      when: inventory_hostname == "web-server-2"
+
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
+      when: inventory_hostname == "web-server-2"
+

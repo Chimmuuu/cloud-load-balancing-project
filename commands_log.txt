@@ -1,0 +1,73 @@
+web-server-2 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.9"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+web-server-1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.9"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+PLAY [Configure Load Balancer and Web Servers] *********************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [web-server-1]
+ok: [web-server-2]
+
+TASK [Detect OS Family] ********************************************************
+ok: [web-server-1] => {
+    "msg": "OS Family is RedHat"
+}
+ok: [web-server-2] => {
+    "msg": "OS Family is RedHat"
+}
+
+TASK [Install Nginx on Web Server 1 (Amazon Linux/RHEL)] ***********************
+skipping: [web-server-2]
+ok: [web-server-1]
+
+TASK [Start and Enable Nginx] **************************************************
+skipping: [web-server-2]
+ok: [web-server-1]
+
+TASK [Copy custom index.html for Nginx] ****************************************
+skipping: [web-server-2]
+ok: [web-server-1]
+
+TASK [Restart Nginx] ***********************************************************
+skipping: [web-server-2]
+changed: [web-server-1]
+
+TASK [Install Apache and Firewalld on Web Server 2] ****************************
+skipping: [web-server-1]
+ok: [web-server-2]
+
+TASK [Start and Enable Apache] *************************************************
+skipping: [web-server-1]
+ok: [web-server-2]
+
+TASK [Copy custom index.html for Apache] ***************************************
+skipping: [web-server-1]
+ok: [web-server-2]
+
+TASK [Open Firewall Ports for Apache] ******************************************
+skipping: [web-server-1]
+ok: [web-server-2]
+
+TASK [Reload Firewalld] ********************************************************
+skipping: [web-server-1]
+changed: [web-server-2]
+
+TASK [Restart Apache] **********************************************************
+skipping: [web-server-1]
+changed: [web-server-2]
+
+PLAY RECAP *********************************************************************
+web-server-1               : ok=6    changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
+web-server-2               : ok=8    changed=2    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+
